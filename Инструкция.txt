@@ -1,0 +1,67 @@
+Полный стек:
+- ReactJS 18
+- TypeScript
+- Redux Toolkit (хранение данных / пицц)
+- React Router v6 (навигация)
+- Axios + Fetch (отправка запроса на бэкенд)
+- React Hooks (хуки)
+- Prettier (форматирование кода)
+- CSS-Modules / SCSS (стилизация)
+- React Content Loader (скелетон)
+- React Pagination (пагинация)
+- Lodash.Debounce
+- Code Splitting, React Loadable, useWhyDidYouUpdate
+
+Установка:
+1) npm install sass
+2) Шрифты из googlefonts вставляй в public>index.html 
+
+Использую https://mockapi.io/ для работы с "бекендом"
+
+Создаем скелетон для каждого товара чтобы не было пустых мест на странице пока прогружаются товары и используем https://skeletonreact.com/
+Устанавливаем библиотеку чтобы работал скелетон npm i react-content-loader
+
+Установи роутер - npm install react-router-dom@6
+
+Стили: используем css moodules  и https://cssgrid-generator.netlify.app/
+
+Фильтрация на фронтенде (если мало товаров 20-30)
+const pizzas = items
+    .filter((obj) => {
+      return obj.title.toLowerCase().includes(searchValue.toLowerCase()); // если в названии пиццы есть то что ввел пользователь, то она попадает в массив
+    })
+
+Фильтрация на бекенде если много товаров:
+В строке запроса.
+      `https://64090850d16b1f3ed6c92dc6.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}&${search}`
+
+Пагинация:
+https://www.npmjs.com/package/react-paginate
+
+npm i react-paginate
+
+Redux:
+Используем https://redux-toolkit.js.org/tutorials/quick-start
+Установка двух отдельных библиотек react-redux и redux-toolkit: npm install @reduxjs/toolkit react-redux
+Создавай слайсы slices в папке store (это аналог редьюсеров в редаксе)
+
+Используем Axios для запросов на бэкенд
+npm install axios
+
+Используем метод debounce из библиотеки lodash
+npm install lodash.debounce
+debounce - это функция которая принимает другую функцию и возвращает новую функцию, которая будет вызываться не чаще чем раз в определенный промежуток времени, например раз в 500 мс
+Можно использовать для оптимизации запросов на бэкенд, чтобы запрос на бекенд не шел после каждого нажатия на клавишу, а только после того как пользователь перестанет печатать
+
+Использую qs бибилиотеку для работы с query string (будем добавлять параметры сортировки и поиска в url)
+Установка npm i qs
+
+Асинхронность и синхронность:
+ const res = await axios.get(
+        // благодаря await axios.get стал синхронным и я могу получить данные с сервера и записать в переменную res, и ниже можно не использовать then. await - жду пока axios выполнит запрос и получит ответ от сервера и только потом выполняется код который идет следом(ниже) (т.к. axios.get - асинхронный запрос) Я превратил axios.get в синхронный код с помощью await
+        // после знака? - параметры запроса и если их несколько то через &
+        // page=1&limit=4 - показывать по 4 пиццы на странице и показывать первую страницу (пагинация)
+        `https://64090850d16b1f3ed6c92dc6.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}&${search}`
+      );
+
+Бизнес логика: запросы на сервер, обработка этих запросов и ошибок и т.д. Это все лучше писать в отдельных файлах(в action), чтобы не засорять компоненты 
