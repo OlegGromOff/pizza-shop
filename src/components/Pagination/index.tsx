@@ -2,7 +2,12 @@ import React from "react";
 import ReactPaginate from "react-paginate";
 import styles from "./Pagination.module.scss";
 
-const Pagination = ({ onChangePage, currentPage }) => {
+type PaginationProps = {
+  currentPage: number;
+  onChangePage: any;
+};
+
+const Pagination: React.FC<PaginationProps> = ({ onChangePage, currentPage }) => {
   return (
     <ReactPaginate
       className={styles.pagination}
@@ -13,7 +18,6 @@ const Pagination = ({ onChangePage, currentPage }) => {
       pageRangeDisplayed={4} // сколько товаров показывать на странице
       pageCount={3} // количество страниц
       forcePage={currentPage - 1} // текущая страница
-      renderOnZeroPageCount={null}
     />
   );
 };

@@ -17,7 +17,7 @@ import Pagination from "../components/Pagination";
 import { selectPizzaData } from "../redux/slices/pizzaSlice"; // импортирую селектор из pizzaSlice.js
 import { selectFilter } from "../redux/slices/filterSlice"; // импортирую селектор из filterSlice.js
 
-const Home = () => {
+const Home:React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch(); // dispatch - hook для отправки данных в store
   const { items, status } = useSelector(selectPizzaData); // получил данные стора из slices/store.js
@@ -27,11 +27,11 @@ const Home = () => {
   const isSearch = React.useRef(false); // использую тут useRef для хранения данных между рендерами (чтобы не перерендеривался компонент)
   const isMounted = React.useRef(false);
 
-  const onChangeCategory = (id) => {
-    dispatch(setCategoryId(id)); // отправил в store categoryId с помощью экшена setCategoryId
+  const onChangeCategory = (idx:number) => {
+    dispatch(setCategoryId(idx)); // отправил в store categoryId с помощью экшена setCategoryId
   };
 
-  const onChangePage = (page) => {
+  const onChangePage = (page:number) => {
     dispatch(setCurrentPage(page)); // отправил в store currentPage с помощью экшена setCurrentPage
   };
 
@@ -42,6 +42,7 @@ const Home = () => {
     const search = searchValue ? `search=${searchValue}` : ""; // если searchValue не пустая строка то добавляю search= и то что ввел пользователь
 
     dispatch(
+      //@ts-ignore
       fetchPizzas({
         sortBy,
         order,
@@ -96,7 +97,7 @@ const Home = () => {
 
   const pizzas = items?.map(
     (
-      pizza // если isLoading false, то показываю карточки с пиццами
+      pizza:any // если isLoading false, то показываю карточки с пиццами
     ) => (
       //переход на страницу пиццы
       <Link to={`/pizza/${pizza.id}`} key={pizza.id}>

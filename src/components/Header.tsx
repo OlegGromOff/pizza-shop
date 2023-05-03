@@ -9,7 +9,7 @@ const Header = () => {
   const { totalPrice, items } = useSelector(selectCart); // использую selectCart из cartSlice.js чтобы не писать повторяющийся код
   const location = useLocation(); // использую хук роутера для определения текущего url (тут можно увидеть все параметры урла)
 
-  const totalCount = items.reduce((sum, item) => item.count + sum, 0); // считаю количество пицц в корзине
+  const totalCount = items.reduce((sum: number, item: any) => item.count + sum, 0); // считаю количество пицц в корзине
   return (
     <div className="header">
       <div className="container">

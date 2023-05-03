@@ -1,6 +1,11 @@
 import React from "react";
 
-const Categories = ({ value, onChangeCategory }) => {
+type CategoriesProps = { // создал тип пропсов компонента
+  value: number;
+  onChangeCategory: any;
+}
+
+const Categories: React.FC<CategoriesProps> = ({ value, onChangeCategory }) => { // указал тип для пропсов компонента CategoriesProps
   const categories = [
     "Все",
     "Мясные",

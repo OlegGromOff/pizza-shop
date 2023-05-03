@@ -2,7 +2,12 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectSort, setSort } from "../redux/slices/filterSlice";
 
-export const sortList = [
+type SortItem = { // создал свой тип для элемента списка сортировки (могу его переиспользовать)
+  name: string;
+  sortProperty: string;
+}
+
+export const sortList: SortItem[] = [ // указал тип как массив объектов 
   { name: "популярности (DESC)", sortProperty: "rating" },
   { name: "популярности (ASC)", sortProperty: "-rating" },
   { name: "цене (DESC)", sortProperty: "price" },
@@ -15,16 +20,16 @@ const Sort = () => {
   const dispatch = useDispatch();
   const sort = useSelector(selectSort); // получил sort из store (если он изменится то весь этот компонет перерисуется) selectSort - чтобы не дублировать код
   const [isVisible, setVisible] = React.useState(false);
-  const sortRef = React.useRef(); // useRef - хук для хранения данных между рендерами
+  const sortRef = React.useRef<HTMLDivElement>(null); // useRef - хук для хранения данных между рендерами. Указал тут тип HTMLDivElement и по умолчанию null, потому что в TS нельзя оставлять значение пустым(undefined)
 
-  const onClickListItem = (obj) => {
+  const onClickListItem = (obj: SortItem) => {
     // выбрал элемент из списка и закрыл список
     // onChangeSort(i);
     setVisible(false);
     dispatch(setSort(obj)); // отправил в store объект с данными сортировки с помощью экшена setSort
   };
   React.useEffect(() => {
-    const handleOutsideClick = (event) => {
+    const handleOutsideClick = (event:any) => {
       let pathEvent = event.composedPath(); // получаем массив элементов по которым кликнули
       if (!pathEvent.includes(sortRef.current)) {
         // если кликнули не по сортировке, то закрыть список

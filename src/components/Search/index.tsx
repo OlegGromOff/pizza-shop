@@ -5,14 +5,14 @@ import { setSearchValue } from "../../redux/slices/filterSlice";
 
 import styles from "./Search.module.scss";
 
-const Search = () => {
+const Search:React.FC = () => {
   const dispatch = useDispatch();
   const [value, setValue] = React.useState("");
-  const inputRef = React.useRef(); // создаю реф для инпута
+  const inputRef = React.useRef<HTMLInputElement>(null); // создаю реф для инпута Тип или null или HTMLInputElement
 
   const updateSearchValue = React.useCallback(
     //ccылка на отложенную функцию
-    debounce((str) => {
+    debounce((str:string) => {
       // чтобы работало правильно надо использовать useCallback чтобы функция не пересоздавалась при каждом рендере
       dispatch(setSearchValue(str)); // обновляю значение поиска в контексте
     }, 250), // создаю дебаунс функцию для теста (вызывается только после того как пользователь перестал вводить текст в инпут) через 250 мс
@@ -22,11 +22,11 @@ const Search = () => {
   const onClickClear = () => {
     dispatch(setSearchValue("")); // очищаем инпут поиска в контексте
     setValue(""); // очищаем значение инпута локально
-    inputRef.current.focus(); // ставим фокус на инпут
+    inputRef.current?.focus(); // ставим фокус на инпут
     // inputRef.current это то же самое что document.querySelector("input")
   };
 
-  const onChangeInput = (event) => {
+  const onChangeInput = (event:any) => {
     setValue(event.target.value); // обновляю значение инпута
     updateSearchValue(event.target.value); // вызываю функцию дебаунса (передаю в нее значение инпута с задержкой)
   };
