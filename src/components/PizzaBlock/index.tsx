@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addItem } from "../../redux/slices/cartSlice";
-import { selectCartItemById } from "../../redux/slices/cartSlice";
+import { Link } from "react-router-dom";
+import { selectCartItemById } from "../../redux/cart/selector";
+import { addItem } from "../../redux/cart/slice";
+import { CartItem } from "../../redux/cart/types";
 
 const typeNames = ["тонкое", "традиционное"];
 
@@ -16,13 +18,14 @@ const PizzaBlock:React.FC<PizzaBlockProps> = ({ id, title, price, imageUrl, size
   const addedCount = cartItem ? cartItem.count : 0;
 
   const onClickAdd = () => {
-    const item = {
+    const item: CartItem = { // создаю объект для добавления в корзину  // CartItem - типизация для объекта в корзине // добавляю в корзину объект с такими полями 
       id,
       title,
       price,
       imageUrl,
       type: typeNames[activeType], // тонкое или традиционное
       size: sizes[activeSize],
+      count: 0, // добавил это сюда потому что тип CartItem ожидает что будет count, а в PizzaBlock.tsx его нет
     };
     dispatch(addItem(item));
   };
@@ -30,8 +33,10 @@ const PizzaBlock:React.FC<PizzaBlockProps> = ({ id, title, price, imageUrl, size
   return (
     <div className="pizza-block-wrapper">
       <div className="pizza-block">
+        <Link key={id} to={`/pizza/${id}`}>
         <img className="pizza-block__image" src={imageUrl} alt="Pizza" />
         <h4 className="pizza-block__title">{title}</h4>
+        </Link>
         <div className="pizza-block__selector">
           <ul>
             {types?.map((type) => (

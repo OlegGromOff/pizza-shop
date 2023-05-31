@@ -1,27 +1,39 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { selectSort, setSort } from "../redux/slices/filterSlice";
+import { useDispatch } from "react-redux";
+import { Sort, SortPropertyEnum } from "../redux/filter/types";
+import { setSort } from "../redux/filter/slice";
 
 type SortItem = { // создал свой тип для элемента списка сортировки (могу его переиспользовать)
   name: string;
-  sortProperty: string;
+  sortProperty: SortPropertyEnum;
+}
+
+type PopupClick= MouseEvent & {
+  path: Node[];
+}; // после & создал свой тип для событий клика и нажатия клавиши
+
+type SortPopupProps = {
+  value: Sort;
 }
 
 export const sortList: SortItem[] = [ // указал тип как массив объектов 
-  { name: "популярности (DESC)", sortProperty: "rating" },
-  { name: "популярности (ASC)", sortProperty: "-rating" },
-  { name: "цене (DESC)", sortProperty: "price" },
-  { name: "цене (ASC)", sortProperty: "-price" },
-  { name: "алфавиту (DESC)", sortProperty: "title" },
-  { name: "алфавиту (ASC)", sortProperty: "-title" },
+  { name: "популярности (DESC)", sortProperty: SortPropertyEnum.RATING_DESC },
+  { name: "популярности (ASC)", sortProperty: SortPropertyEnum.RATING_ASC },
+  { name: "цене (DESC)", sortProperty: SortPropertyEnum.PRICE_DESC },
+  { name: "цене (ASC)", sortProperty: SortPropertyEnum.PRICE_ASC },
+  { name: "алфавиту (DESC)", sortProperty: SortPropertyEnum.TITLE_DESC },
+  { name: "алфавиту (ASC)", sortProperty: SortPropertyEnum.TITLE_ASC },
 ];
 
-const Sort = () => {
+
+
+const SortPopup: React.FC<SortPopupProps> = React.memo(({value}) => {
   const dispatch = useDispatch();
-  const sort = useSelector(selectSort); // получил sort из store (если он изменится то весь этот компонет перерисуется) selectSort - чтобы не дублировать код
   const [isVisible, setVisible] = React.useState(false);
   const sortRef = React.useRef<HTMLDivElement>(null); // useRef - хук для хранения данных между рендерами. Указал тут тип HTMLDivElement и по умолчанию null, потому что в TS нельзя оставлять значение пустым(undefined)
 
+
+  
   const onClickListItem = (obj: SortItem) => {
     // выбрал элемент из списка и закрыл список
     // onChangeSort(i);
@@ -29,9 +41,9 @@ const Sort = () => {
     dispatch(setSort(obj)); // отправил в store объект с данными сортировки с помощью экшена setSort
   };
   React.useEffect(() => {
-    const handleOutsideClick = (event:any) => {
-      let pathEvent = event.composedPath(); // получаем массив элементов по которым кликнули
-      if (!pathEvent.includes(sortRef.current)) {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const _event = event as PopupClick; // привел event к своему типу (_event - это тот же event только с другим типом)
+      if (sortRef.current && !_event.path?.includes(sortRef.current)) {
         // если кликнули не по сортировке, то закрыть список
         setVisible(false);
       }
@@ -60,7 +72,7 @@ const Sort = () => {
           />
         </svg>
         <b>Сортировка по:</b>
-        <span onClick={() => setVisible(!isVisible)}>{sort.name}</span>
+        <span onClick={() => setVisible(!isVisible)}>{value.name}</span>
       </div>
       {isVisible && ( // if isVisible is true, then show the following
         <div className="sort__popup">
@@ -69,7 +81,7 @@ const Sort = () => {
               <li
                 key={i}
                 className={
-                  sort.sortProperty === obj.sortProperty ? "active" : ""
+                  value.sortProperty === obj.sortProperty ? "active" : ""
                 }
                 onClick={() => onClickListItem(obj)}
               >
@@ -81,6 +93,6 @@ const Sort = () => {
       )}
     </div>
   );
-};
+});
 
-export default Sort;
+export default SortPopup;

@@ -1,9 +1,9 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import debounce from "lodash.debounce";
-import { setSearchValue } from "../../redux/slices/filterSlice";
 
 import styles from "./Search.module.scss";
+import { setSearchValue } from "../../redux/filter/slice";
 
 const Search:React.FC = () => {
   const dispatch = useDispatch();
@@ -26,7 +26,7 @@ const Search:React.FC = () => {
     // inputRef.current это то же самое что document.querySelector("input")
   };
 
-  const onChangeInput = (event:any) => {
+  const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => { // типизирую event
     setValue(event.target.value); // обновляю значение инпута
     updateSearchValue(event.target.value); // вызываю функцию дебаунса (передаю в нее значение инпута с задержкой)
   };

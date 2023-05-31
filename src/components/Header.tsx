@@ -1,15 +1,26 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import logoSvg from "../assets/img/pizza-logo.svg";
 import Search from "./Search";
-import { selectCart } from "../redux/slices/cartSlice";
+import { selectCart } from "../redux/cart/selector";
 
 const Header = () => {
-  const { totalPrice, items } = useSelector(selectCart); // использую selectCart из cartSlice.js чтобы не писать повторяющийся код
+  const { totalPrice, items } = useSelector(selectCart); // использую selectCart чтобы не писать повторяющийся код
   const location = useLocation(); // использую хук роутера для определения текущего url (тут можно увидеть все параметры урла)
+  const isMounted = React.useRef(false); // использую useRef для того чтобы не сохранять корзину в localStorage при первом рендере (при первом рендере корзина пустая)
 
   const totalCount = items.reduce((sum: number, item: any) => item.count + sum, 0); // считаю количество пицц в корзине
+  
+  React.useEffect(() => {
+    if(isMounted.current) { // если компонент уже отрендерился (т.е. корзина не пустая)
+      const json = JSON.stringify(items);
+      localStorage.setItem('cart', json);
+    }
+    isMounted.current = true; // меняю значение useRef на true чтобы при следующем рендере сохранить корзину в localStorage
+  }, [items]) // сохраняю корзину в localStorage при изменении корзины (добавление/удаление пиццы)
+
   return (
     <div className="header">
       <div className="container">
@@ -22,7 +33,7 @@ const Header = () => {
             </div>
           </div>
         </Link>
-        <Search />
+        {location.pathname !== "/cart" && <Search />}
         <div className="header__cart">
           {location.pathname !== "/cart" && (
             <Link to="/cart" className="button button--cart">

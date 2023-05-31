@@ -2,18 +2,20 @@ import React from "react";
 
 type CategoriesProps = { // создал тип пропсов компонента
   value: number;
-  onChangeCategory: any;
+  onChangeCategory: (i:number)=> void; // функция которая получает 1 аргумент с типом number и ничего не возвращает
 }
 
-const Categories: React.FC<CategoriesProps> = ({ value, onChangeCategory }) => { // указал тип для пропсов компонента CategoriesProps
-  const categories = [
-    "Все",
-    "Мясные",
-    "Вегетарианская",
-    "Гриль",
-    "Острые",
-    "Закрытые",
-  ];
+const categories = [
+  "Все",
+  "Мясные",
+  "Вегетарианская",
+  "Гриль",
+  "Острые",
+  "Закрытые",
+];
+
+const Categories: React.FC<CategoriesProps> = React.memo(({ value, onChangeCategory }) => { // указал тип для пропсов компонента CategoriesProps
+  // React.memo - хук для оптимизации производительности (чтобы компонент не перерисовывался при каждом рендере)
 
   return (
     <div className="categories">
@@ -32,6 +34,6 @@ const Categories: React.FC<CategoriesProps> = ({ value, onChangeCategory }) => {
       </ul>
     </div>
   );
-};
+});
 
 export default Categories;

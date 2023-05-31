@@ -1,25 +1,20 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux"; // useSelector - hook для получения данных из store
-import qs from "qs"; // qs - библиотека для работы с query string
-import { useNavigate, Link } from "react-router-dom"; // useNavigate - hook для перехода по страницам без перезагрузки
-import {
-  setCategoryId,
-  setCurrentPage,
-  setFilters,
-} from "../redux/slices/filterSlice"; // импортирую actions из filterSlice.js
-import { fetchPizzas } from "../redux/slices/pizzaSlice"; // импортирую actions из pizzaSlice.js
+import { useSelector } from "react-redux"; // useSelector - hook для получения данных из store
+import { useNavigate } from "react-router-dom"; // useNavigate - hook для перехода по страницам без перезагрузки
 import Categories from "../components/Categories";
 import Sort from "../components/Sort";
-import { sortList } from "../components/Sort"; // импортирую массив сортировок
 import PizzaBlock from "../components/PizzaBlock";
 import Skeleton from "../components/PizzaBlock/Skeleton";
 import Pagination from "../components/Pagination";
-import { selectPizzaData } from "../redux/slices/pizzaSlice"; // импортирую селектор из pizzaSlice.js
-import { selectFilter } from "../redux/slices/filterSlice"; // импортирую селектор из filterSlice.js
+import { useAppDispatch } from "../redux/store"; // импортирую типизацию для useDispatch чтобы передавать асинхронный экшен внутрь dispatch
+import { selectPizzaData } from "../redux/pizza/selector";
+import { fetchPizzas } from "../redux/pizza/asyncActions";
+import { selectFilter } from "../redux/filter/selector";
+import { setCategoryId, setCurrentPage } from "../redux/filter/slice";
 
 const Home:React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // dispatch - hook для отправки данных в store
+  const dispatch = useAppDispatch(); // dispatch - hook для отправки данных в store
   const { items, status } = useSelector(selectPizzaData); // получил данные стора из slices/store.js
   const { categoryId, sort, currentPage, searchValue } =
     useSelector(selectFilter); // получил данные стора из slices/store.js
@@ -27,9 +22,9 @@ const Home:React.FC = () => {
   const isSearch = React.useRef(false); // использую тут useRef для хранения данных между рендерами (чтобы не перерендеривался компонент)
   const isMounted = React.useRef(false);
 
-  const onChangeCategory = (idx:number) => {
+  const onChangeCategory =  React.useCallback((idx:number) => {
     dispatch(setCategoryId(idx)); // отправил в store categoryId с помощью экшена setCategoryId
-  };
+  }, []); // useCallback - хук для оптимизации производительности (чтобы функция не пересоздавалась при каждом рендере)
 
   const onChangePage = (page:number) => {
     dispatch(setCurrentPage(page)); // отправил в store currentPage с помощью экшена setCurrentPage
@@ -42,13 +37,12 @@ const Home:React.FC = () => {
     const search = searchValue ? `search=${searchValue}` : ""; // если searchValue не пустая строка то добавляю search= и то что ввел пользователь
 
     dispatch(
-      //@ts-ignore
       fetchPizzas({
         sortBy,
         order,
         category,
         search,
-        currentPage,
+        currentPage: String(currentPage), // currentPage - это number, а в запросе нужна строка (String(currentPage)) (привел к строке) 
       })
     ); // получил данные с сервера и записал в items (res.data - данные которые приходят с сервера), res - ответ от сервера
 
@@ -56,34 +50,48 @@ const Home:React.FC = () => {
   };
 
   // если изменился categoryId, sortType, currentPage или searchValue, и был первый рендер  то отправляю запрос на сервер
-  React.useEffect(() => {
-    // выполним код только если это не первый рендер
-    if (isMounted.current) {
-      // если первый рендер уже был
-      const queryString = qs.stringify({
-        // qs.stringify - превращает объект в строку с параметрами запроса, типа  ?sortBy=rating&order=desc
-        sortProperty: sortType,
-        categoryId,
-        currentPage,
-      });
-      navigate(`?${queryString}`); // navigate - переход на страницу без перезагрузки (передаю параметры запроса в строку браузера, типа ?sortBy=rating&order=desc)
-    }
+  // React.useEffect(() => {
+  //   // выполним код только если это не первый рендер
+  //   if (isMounted.current) {
+  //     // если первый рендер уже был
+  //     const queryString = qs.stringify({
+  //       // qs.stringify - превращает объект в строку с параметрами запроса, типа  ?sortBy=rating&order=desc
+  //       sortProperty: sortType,
+  //       categoryId,
+  //       currentPage,
+  //     });
+  //     navigate(`?${queryString}`); // navigate - переход на страницу без перезагрузки (передаю параметры запроса в строку браузера, типа ?sortBy=rating&order=desc)
+  //   }
 
-    isMounted.current = true; // первый рендер уже был
-  }, [categoryId, sortType, currentPage]);
+  //   if(!window.location.search) { // если нет параметров запроса в строке браузера
+  //     dispatch(fetchPizzas({} as SearchPizzaParams)) // отправляю пустой объект в fetchPizzas чтобы очистить items в store (чтобы не было мигания при переходе на другую категорию) 
+  //   }
+
+  //   isMounted.current = true; // первый рендер уже был
+  // }, [categoryId, sortType, currentPage]);
+
+  React.useEffect(() => {
+    getPizzas();
+  }, [categoryId, sort.sortProperty, searchValue, currentPage]);
 
   // если был первый рендер, то проверяю есть ли параметры запроса в строке браузера и если есть то отправляю их в store
-  React.useEffect(() => {
-    if (window.location.search) {
-      // если есть параметры запроса в строке браузера
-      const query = qs.parse(window.location.search.slice(1)); // qs.parse - превращает строку с параметрами запроса в объект, типа  ?sortBy=rating&order=desc  ->  {sortBy: "rating", order: "desc"} и убрал ? с помощью slice(1)
-      const sort = sortList.find(
-        (obj) => obj.sortProperty === query.sortProperty
-      ); // нашел в массиве sortList объект с таким же sortProperty как в query.sortProperty
-      dispatch(setFilters({ ...query, sort })); // отправил в store categoryId, currentPage, sort с помощью экшена setFilters
-      isSearch.current = true; // если пользователь перешел на страницу с параметрами запроса в строке браузера, то он использовал поиск
-    }
-  }, []);
+  // React.useEffect(() => {
+  //   if (window.location.search) {
+  //     // если есть параметры запроса в строке браузера
+  //     const params = qs.parse(window.location.search.substring(1)) as unknown as SearchPizzaParams; // qs.parse - превращает строку с параметрами запроса в объект, типа  ?sortBy=rating&order=desc  ->  {sortBy: "rating", order: "desc"} и убрал ? с помощью slice(1)
+  //     const sort = sortList.find(
+  //       (obj) => obj.sortProperty === params.sortBy
+  //     ); // нашел в массиве sortList объект с таким же sortProperty как в query.sortProperty
+      
+  //     dispatch(setFilters({
+  //       searchValue: params.search,
+  //       categoryId: Number(params.category), 
+  //       sort: sort || sortList[0], // если sort не найден, то беру первый элемент массива sortList
+  //       currentPage: Number(params.currentPage),
+  //     })); // отправил в store categoryId, currentPage, sort с помощью экшена setFilters
+  //     isSearch.current = true; // если пользователь перешел на страницу с параметрами запроса в строке браузера, то он использовал поиск
+  //   }
+  // }, []);
 
   // если был первый рендер, то отправляю запрос на сервер
   React.useEffect(() => {
@@ -100,11 +108,9 @@ const Home:React.FC = () => {
       pizza:any // если isLoading false, то показываю карточки с пиццами
     ) => (
       //переход на страницу пиццы
-      <Link to={`/pizza/${pizza.id}`} key={pizza.id}>
-        <PizzaBlock
+        <PizzaBlock key={pizza.id}
           {...pizza} // передал все свойства объекта pizza
         />
-      </Link>
     )
   );
 
@@ -119,7 +125,7 @@ const Home:React.FC = () => {
     <div className="container">
       <div className="content__top">
         <Categories value={categoryId} onChangeCategory={onChangeCategory} />
-        <Sort />
+        <Sort value={sort}/>
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === "error" ? (
