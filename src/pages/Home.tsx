@@ -12,10 +12,12 @@ import { fetchPizzas } from "../redux/pizza/asyncActions";
 import { selectFilter } from "../redux/filter/selector";
 import { setCategoryId, setCurrentPage } from "../redux/filter/slice";
 
+
 const Home:React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch(); // dispatch - hook для отправки данных в store
   const { items, status } = useSelector(selectPizzaData); // получил данные стора из slices/store.js
+  
   const { categoryId, sort, currentPage, searchValue } =
     useSelector(selectFilter); // получил данные стора из slices/store.js
   const sortType = sort.sortProperty;
@@ -29,6 +31,7 @@ const Home:React.FC = () => {
   const onChangePage = (page:number) => {
     dispatch(setCurrentPage(page)); // отправил в store currentPage с помощью экшена setCurrentPage
   };
+
 
   const getPizzas = async () => {
     const order = sortType.includes("-") ? "asc" : "desc"; // если в sortProperty есть "-" то asc, иначе desc
@@ -125,7 +128,7 @@ const Home:React.FC = () => {
     <div className="container">
       <div className="content__top">
         <Categories value={categoryId} onChangeCategory={onChangeCategory} />
-        <Sort value={sort}/>
+        <Sort value={sort} />
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === "error" ? (

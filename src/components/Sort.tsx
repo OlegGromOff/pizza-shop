@@ -45,7 +45,8 @@ const SortPopup: React.FC<SortPopupProps> = React.memo(({value}) => {
       const _event = event as PopupClick; // привел event к своему типу (_event - это тот же event только с другим типом)
       if (sortRef.current && !_event.path?.includes(sortRef.current)) {
         // если кликнули не по сортировке, то закрыть список
-        setVisible(false);
+        // setVisible(false)
+        // if (isVisible) {setVisible(false)}
       }
     };
     document.body.addEventListener("click", handleOutsideClick);
@@ -55,7 +56,7 @@ const SortPopup: React.FC<SortPopupProps> = React.memo(({value}) => {
       document.body.removeEventListener("click", handleOutsideClick);
     };
   }, []);
-
+console.log("isVisible", isVisible);
   return (
     <div ref={sortRef} className="sort">
       <div className="sort__label">

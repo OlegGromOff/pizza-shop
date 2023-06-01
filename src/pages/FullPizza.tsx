@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom"
 import { useParams, useNavigate } from "react-router-dom"; // useParams - hook для получения параметров из url
 import axios from "axios";
 
@@ -38,6 +39,11 @@ const FullPizza: React.FC = () => { // типизпция компонента (
       <img src={pizza.imageUrl} alt="Pizza" />
       <h2>{pizza.title}</h2>
       <h4>{pizza.price} uah</h4>
+      <Link to="/">
+      <button className="button button--outline button--add">
+            <span>Назад</span>
+      </button>
+      </Link>
     </div>
   );
 };
